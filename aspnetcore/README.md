@@ -1,6 +1,6 @@
 # IO.Swagger - ASP.NET Core 2.0 Server
 
-This is a simple Geth API
+Minimal OpenAPI specification for Spacemesh public facing API.
 
 ## Run
 

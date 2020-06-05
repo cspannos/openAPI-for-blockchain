@@ -1,14 +1,11 @@
 {
-  "openapi" : "3.0.0",
+  "openapi" : "3.0.1",
   "info" : {
-    "title" : "Simple Geth API",
-    "description" : "This is a simple Geth API",
-    "contact" : {
-      "email" : "spannos@gmail.com"
-    },
+    "title" : "OpenAPI Implementation of Spacemesh API ",
+    "description" : "Minimal OpenAPI specification for Spacemesh public facing API.",
     "license" : {
-      "name" : "Apache 2.0",
-      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
+      "name" : "MIT License",
+      "url" : "https://opensource.org/licenses/MIT"
     },
     "version" : "1.0.0"
   },
@@ -17,64 +14,130 @@
     "description" : "SwaggerHub API Auto Mocking"
   } ],
   "tags" : [ {
-    "name" : "admins",
-    "description" : "Secured Admin-only calls"
+    "name" : "NodeService",
+    "description" : "A simply Read only test end point for basic node data."
   }, {
-    "name" : "developers",
-    "description" : "Operations available to regular developers"
+    "name" : "Echo",
+    "description" : "A simple test endpoint."
   } ],
   "paths" : {
-    "/inventory" : {
+    "/node/version" : {
       "get" : {
-        "tags" : [ "developers" ],
-        "summary" : "searches inventory",
-        "description" : "By passing in the appropriate options, you can search for\navailable inventory in the system\n",
-        "operationId" : "searchInventory",
+        "tags" : [ "Version" ],
+        "summary" : "Returns the version of the node software as a semver string",
+        "description" : "Requests that the beacon node identify information about its implementation in a format similar to a  [HTTP User-Agent](https://tools.ietf.org/html/rfc7231#section-5.5.3) field.",
+        "responses" : {
+          "200" : {
+            "description" : "Request successful",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/version"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Beacon node internal error."
+          }
+        }
+      }
+    },
+    "/node/genesis_time" : {
+      "get" : {
+        "tags" : [ "Build" ],
+        "summary" : "Returns the github tag or branch used to build the node.",
+        "description" : "Requests the genesis_time parameter from the beacon node, which should be consistent across all beacon nodes that follow the same beacon chain.",
+        "responses" : {
+          "200" : {
+            "description" : "Request successful",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/genesis_time"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Beacon node internal error."
+          }
+        }
+      }
+    },
+    "/node/syncing" : {
+      "get" : {
+        "tags" : [ "Status" ],
+        "summary" : "Current node status (net and sync).",
+        "description" : "Requests the beacon node to describe if it's currently syncing or not, and if it is, what block it is up to. This is modelled after the Eth1.0 JSON-RPC eth_syncing call..",
+        "responses" : {
+          "200" : {
+            "description" : "Request successful",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_200"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Beacon node internal error."
+          }
+        }
+      }
+    },
+    "/node/fork" : {
+      "get" : {
+        "tags" : [ "Optional" ],
+        "summary" : "Get fork information from running beacon node.",
+        "description" : "Requests the beacon node to provide which fork version it is currently on.",
+        "responses" : {
+          "200" : {
+            "description" : "Request successful",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_200_1"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Beacon node internal error."
+          }
+        }
+      }
+    },
+    "/validator/duties" : {
+      "get" : {
+        "tags" : [ "Necessary for validator" ],
+        "summary" : "Get validator duties for the requested validators.",
+        "description" : "Requests the beacon node to provide a set of _duties_, which are actions that should be performed by validators. This API call should be polled at every slot, to ensure that any chain reorganisations are catered for, and to ensure that the currently connected beacon node is properly synchronised.",
         "parameters" : [ {
-          "name" : "searchString",
+          "name" : "validator_pubkeys",
           "in" : "query",
-          "description" : "pass an optional search string for looking up inventory",
-          "required" : false,
+          "description" : "An array of hex-encoded BLS public keys",
+          "required" : true,
           "style" : "form",
           "explode" : true,
           "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "name" : "skip",
-          "in" : "query",
-          "description" : "number of records to skip for pagination",
-          "required" : false,
-          "style" : "form",
-          "explode" : true,
-          "schema" : {
-            "minimum" : 0,
-            "type" : "integer",
-            "format" : "int32"
-          }
-        }, {
-          "name" : "limit",
-          "in" : "query",
-          "description" : "maximum number of records to return",
-          "required" : false,
-          "style" : "form",
-          "explode" : true,
-          "schema" : {
-            "maximum" : 50,
-            "minimum" : 0,
-            "type" : "integer",
-            "format" : "int32"
+            "minItems" : 1,
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/pubkey"
+            }
           }
         } ],
         "responses" : {
           "200" : {
-            "description" : "search results matching criteria",
+            "description" : "Success response",
             "content" : {
               "application/json" : {
                 "schema" : {
                   "type" : "array",
                   "items" : {
-                    "$ref" : "#/components/schemas/InventoryItem"
+                    "$ref" : "#/components/schemas/ValidatorDuty"
                   },
                   "x-content-type" : "application/json"
                 }
@@ -82,34 +145,173 @@
             }
           },
           "400" : {
-            "description" : "bad input parameter"
+            "description" : "Invalid request syntax."
+          },
+          "500" : {
+            "description" : "Beacon node internal error."
+          },
+          "503" : {
+            "description" : "Beacon node is currently syncing, try again later."
+          }
+        }
+      }
+    },
+    "/validator/block" : {
+      "get" : {
+        "tags" : [ "Necessary for validator" ],
+        "summary" : "Produce a new block, without signature.",
+        "description" : "Requests a beacon node to produce a valid block, which can then be signed by a validator.",
+        "parameters" : [ {
+          "name" : "slot",
+          "in" : "query",
+          "description" : "The slot for which the block should be proposed.",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "uint64"
+          }
+        }, {
+          "name" : "randao_reveal",
+          "in" : "query",
+          "description" : "The validator's randao reveal value.",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "byte"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BeaconBlock"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request syntax."
+          },
+          "500" : {
+            "description" : "Beacon node internal error."
+          },
+          "503" : {
+            "description" : "Beacon node is currently syncing, try again later."
           }
         }
       },
       "post" : {
-        "tags" : [ "admins" ],
-        "summary" : "adds an inventory item",
-        "description" : "Adds an item to the system",
-        "operationId" : "addInventory",
-        "requestBody" : {
-          "description" : "Inventory item to add",
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/InventoryItem"
-              }
-            }
+        "tags" : [ "Necessary for validator" ],
+        "summary" : "Publish a signed block.",
+        "description" : "Instructs the beacon node to publish a newly signed beacon block to the beacon network, to be included in the beacon chain.",
+        "parameters" : [ {
+          "name" : "beacon_block",
+          "in" : "query",
+          "description" : "The `BeaconBlock` object, as sent from the beacon node originally, but now with the signature field completed.",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/BeaconBlock"
           }
-        },
+        } ],
         "responses" : {
-          "201" : {
-            "description" : "item created"
+          "200" : {
+            "description" : "Request successful."
           },
           "400" : {
-            "description" : "invalid input, object invalid"
+            "description" : "Invalid request syntax."
           },
-          "409" : {
-            "description" : "an existing item already exists"
+          "500" : {
+            "description" : "Beacon node internal error."
+          },
+          "503" : {
+            "description" : "Beacon node is currently syncing, try again later."
+          }
+        }
+      }
+    },
+    "/validator/attestation" : {
+      "get" : {
+        "tags" : [ "Necessary for validator" ],
+        "summary" : "Produce an attestation, without signature.",
+        "description" : "Requests that the beacon node produce an IndexedAttestation, with a blank signature field, which the validator will then sign.",
+        "parameters" : [ {
+          "name" : "slot",
+          "in" : "query",
+          "description" : "The slot for which the attestation should be proposed.",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        }, {
+          "name" : "shard",
+          "in" : "query",
+          "description" : "The shard number for which the attestation is to be proposed.",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Success response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/IndexedAttestation"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request syntax."
+          },
+          "500" : {
+            "description" : "Beacon node internal error."
+          },
+          "503" : {
+            "description" : "Beacon node is currently syncing, try again later."
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Necessary for validator" ],
+        "summary" : "Published a signed attestation.",
+        "description" : "Instructs the beacon node to publish a newly signed IndexedAttestation object, to be incorporated into the beacon chain.",
+        "parameters" : [ {
+          "name" : "attestation",
+          "in" : "query",
+          "description" : "An `IndexedAttestation` structure, as originally provided by the beacon node, but now with the signature field completed.",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/IndexedAttestation"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Request successful."
+          },
+          "400" : {
+            "description" : "Invalid request syntax."
+          },
+          "500" : {
+            "description" : "Beacon node internal error."
+          },
+          "503" : {
+            "description" : "Beacon node is currently syncing, try again later."
           }
         }
       }
@@ -117,62 +319,610 @@
   },
   "components" : {
     "schemas" : {
-      "InventoryItem" : {
-        "required" : [ "id", "manufacturer", "name", "releaseDate" ],
+      "pubkey" : {
+        "pattern" : "^0x[a-fA-F0-9]{96}$",
+        "type" : "string",
+        "description" : "The validator's BLS public key, uniquely identifying them. _48-bytes, hex encoded with 0x prefix, case insensitive._",
+        "format" : "byte"
+      },
+      "version" : {
+        "type" : "string",
+        "description" : "A string which uniquely identifies the client implementation and its version; similar to [HTTP User-Agent](https://tools.ietf.org/html/rfc7231#section-5.5.3).",
+        "example" : "Lighthouse / v0.1.5 (Linux x86_64)"
+      },
+      "genesis_time" : {
+        "type" : "integer",
+        "description" : "The genesis_time configured for the beacon node, which is the time the Eth1.0 validator deposit smart contract has enough ETH staked (i.e. Eth2.0 begins).",
+        "format" : "uint64",
+        "example" : 1557716289
+      },
+      "ValidatorDuty" : {
         "type" : "object",
         "properties" : {
-          "id" : {
-            "type" : "string",
-            "format" : "uuid",
-            "example" : "d290f1ee-6c54-4b01-90e6-d701748f0851"
+          "validator_pubkey" : {
+            "$ref" : "#/components/schemas/pubkey"
           },
-          "name" : {
-            "type" : "string",
-            "example" : "Widget Adapter"
+          "committee_index" : {
+            "type" : "integer",
+            "description" : "The index of the validator in the committee.",
+            "format" : "uint64"
           },
-          "releaseDate" : {
-            "type" : "string",
-            "format" : "date-time",
-            "example" : "2016-08-29T09:12:33.001Z"
+          "attestation_slot" : {
+            "type" : "integer",
+            "description" : "The slot at which the validator must attest.",
+            "format" : "uint64"
           },
-          "manufacturer" : {
-            "$ref" : "#/components/schemas/Manufacturer"
+          "attestation_shard" : {
+            "type" : "integer",
+            "description" : "The shard in which the validator must attest.",
+            "format" : "uint64"
+          },
+          "block_production_slot" : {
+            "type" : "integer",
+            "description" : "The slot in which a validator must propose a block, or `null` if block production is not required.",
+            "format" : "uint64",
+            "nullable" : true
           }
         },
         "example" : {
-          "releaseDate" : "2016-08-29T09:12:33.001Z",
-          "name" : "Widget Adapter",
-          "id" : "d290f1ee-6c54-4b01-90e6-d701748f0851",
-          "manufacturer" : {
-            "phone" : "408-867-5309",
-            "name" : "ACME Corporation",
-            "homePage" : "https://www.acme-corp.com"
+          "attestation_shard" : 1,
+          "attestation_slot" : 6,
+          "block_production_slot" : 5,
+          "committee_index" : 0,
+          "validator_pubkey" : ""
+        }
+      },
+      "SyncingStatus" : {
+        "type" : "object",
+        "properties" : {
+          "starting_block" : {
+            "type" : "integer",
+            "description" : "The block at which syncing started (will only be reset after the sync reached its head)",
+            "format" : "uint64"
+          },
+          "current_block" : {
+            "type" : "integer",
+            "description" : "The current highest block sync'd by the beacon node.",
+            "format" : "uint64"
+          },
+          "highest_block" : {
+            "type" : "integer",
+            "description" : "The estimated highest block, or current target block number.",
+            "format" : "uint64"
+          }
+        },
+        "nullable" : true,
+        "example" : {
+          "current_block" : 6,
+          "starting_block" : 0,
+          "highest_block" : 1
+        }
+      },
+      "BeaconBlock" : {
+        "description" : "The [`BeaconBlock`](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/core/0_beacon-chain.md#beaconblock) object from the Eth2.0 spec.",
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/BeaconBlockCommon"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "body" : {
+              "$ref" : "#/components/schemas/BeaconBlockBody"
+            }
+          }
+        } ]
+      },
+      "BeaconBlockHeader" : {
+        "description" : "The [`BeaconBlockHeader`](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/core/0_beacon-chain.md#beaconblockheader) object from the Eth2.0 spec.",
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/BeaconBlockCommon"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "body_root" : {
+              "pattern" : "^0x[a-fA-F0-9]{64}$",
+              "type" : "string",
+              "description" : "The tree hash merkle root of the `BeaconBlockBody` for the `BeaconBlock`",
+              "format" : "bytes"
+            }
+          }
+        } ]
+      },
+      "BeaconBlockCommon" : {
+        "type" : "object",
+        "properties" : {
+          "slot" : {
+            "type" : "integer",
+            "description" : "The slot to which this block corresponds.",
+            "format" : "uint64"
+          },
+          "parent_root" : {
+            "pattern" : "^0x[a-fA-F0-9]{64}$",
+            "type" : "string",
+            "description" : "The signing merkle root of the parent `BeaconBlock`.",
+            "format" : "bytes"
+          },
+          "state_root" : {
+            "pattern" : "^0x[a-fA-F0-9]{64}$",
+            "type" : "string",
+            "description" : "The tree hash merkle root of the `BeaconState` for the `BeaconBlock`.",
+            "format" : "bytes"
+          },
+          "signature" : {
+            "pattern" : "^0x[a-fA-F0-9]{192}$",
+            "type" : "string",
+            "description" : "The BLS signature of the `BeaconBlock` made by the validator of the block.",
+            "format" : "bytes",
+            "example" : "0x1b66ac1fb663c9bc59509846d6ec05345bd908eda73e670af888da41af171505cc411d61252fb6cb3fa0017b679f8bb2305b26a285fa2737f175668d0dff91cc1b66ac1fb663c9bc59509846d6ec05345bd908eda73e670af888da41af171505"
           }
         }
       },
-      "Manufacturer" : {
-        "required" : [ "name" ],
+      "BeaconBlockBody" : {
         "type" : "object",
         "properties" : {
-          "name" : {
+          "randao_reveal" : {
+            "pattern" : "^0x[a-fA-F0-9]{192}$",
             "type" : "string",
-            "example" : "ACME Corporation"
+            "description" : "The RanDAO reveal value provided by the validator.",
+            "format" : "byte"
           },
-          "homePage" : {
-            "type" : "string",
-            "format" : "url",
-            "example" : "https://www.acme-corp.com"
+          "eth1_data" : {
+            "$ref" : "#/components/schemas/Eth1Data"
           },
-          "phone" : {
+          "graffiti" : {
+            "pattern" : "^0x[a-fA-F0-9]{64}$",
             "type" : "string",
-            "example" : "408-867-5309"
+            "format" : "byte"
+          },
+          "proposer_slashings" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ProposerSlashings"
+            }
+          },
+          "attester_slashings" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/AttesterSlashings"
+            }
+          },
+          "attestations" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Attestation"
+            }
+          },
+          "deposits" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Deposit"
+            }
+          },
+          "voluntary_exits" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/VoluntaryExit"
+            }
+          },
+          "transfers" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Transfer"
+            }
+          }
+        },
+        "description" : "The [`BeaconBlockBody`](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/core/0_beacon-chain.md#beaconblockbody) object from the Eth2.0 spec."
+      },
+      "Fork" : {
+        "type" : "object",
+        "properties" : {
+          "previous_version" : {
+            "pattern" : "^0x[a-fA-F0-9]{8}$",
+            "type" : "string",
+            "description" : "Previous fork version.",
+            "format" : "byte"
+          },
+          "current_version" : {
+            "pattern" : "^0x[a-fA-F0-9]{8}$",
+            "type" : "string",
+            "description" : "Current fork version.",
+            "format" : "byte"
+          },
+          "epoch" : {
+            "type" : "integer",
+            "description" : "Fork epoch number.",
+            "format" : "uint64"
+          }
+        },
+        "description" : "The [`Fork`](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/core/0_beacon-chain.md#Fork) object from the Eth2.0 spec.",
+        "example" : {
+          "previous_version" : "",
+          "current_version" : "",
+          "epoch" : 0
+        }
+      },
+      "IndexedAttestation" : {
+        "type" : "object",
+        "properties" : {
+          "custody_bit_0_indicies" : {
+            "type" : "array",
+            "description" : "Validator indicies for 0 bits.",
+            "items" : {
+              "type" : "integer",
+              "format" : "uint64"
+            }
+          },
+          "custody_bit_1_indicies" : {
+            "type" : "array",
+            "description" : "Validator indicies for 1 bits.",
+            "items" : {
+              "type" : "integer",
+              "format" : "uint64"
+            }
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/AttestationData"
+          }
+        },
+        "description" : "The [`IndexedAttestation`](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/core/0_beacon-chain.md#indexedattestation) object from the Eth2.0 spec.",
+        "example" : {
+          "data" : {
+            "beacon_block_root" : "",
+            "source_root" : "",
+            "target_epoch" : 5,
+            "source_epoch" : 1,
+            "target_root" : "",
+            "crosslink" : {
+              "data_root" : "",
+              "parent_root" : "",
+              "epoch" : 2,
+              "shard" : 5
+            }
+          },
+          "custody_bit_1_indicies" : [ 6, 6 ],
+          "custody_bit_0_indicies" : [ 0, 0 ]
+        }
+      },
+      "AttestationData" : {
+        "type" : "object",
+        "properties" : {
+          "beacon_block_root" : {
+            "pattern" : "^0x[a-fA-F0-9]{64}$",
+            "type" : "string",
+            "description" : "LMD GHOST vote.",
+            "format" : "byte"
+          },
+          "source_epoch" : {
+            "type" : "integer",
+            "description" : "Source epoch from FFG vote.",
+            "format" : "uint64"
+          },
+          "source_root" : {
+            "pattern" : "^0x[a-fA-F0-9]{64}$",
+            "type" : "string",
+            "description" : "Source root from FFG vote.",
+            "format" : "byte"
+          },
+          "target_epoch" : {
+            "type" : "integer",
+            "description" : "Target epoch from FFG vote.",
+            "format" : "uint64"
+          },
+          "target_root" : {
+            "pattern" : "^0x[a-fA-F0-9]{64}$",
+            "type" : "string",
+            "description" : "Target root from FFG vote.",
+            "format" : "byte"
+          },
+          "crosslink" : {
+            "$ref" : "#/components/schemas/CrossLink"
+          }
+        },
+        "description" : "The [`AttestationData`](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/core/0_beacon-chain.md#attestationdata) object from the Eth2.0 spec.",
+        "example" : {
+          "beacon_block_root" : "",
+          "source_root" : "",
+          "target_epoch" : 5,
+          "source_epoch" : 1,
+          "target_root" : "",
+          "crosslink" : {
+            "data_root" : "",
+            "parent_root" : "",
+            "epoch" : 2,
+            "shard" : 5
+          }
+        }
+      },
+      "inline_response_200" : {
+        "type" : "object",
+        "properties" : {
+          "is_syncing" : {
+            "type" : "boolean",
+            "description" : "A boolean of whether the node is currently syncing or not."
+          },
+          "sync_status" : {
+            "$ref" : "#/components/schemas/SyncingStatus"
           }
         },
         "example" : {
-          "phone" : "408-867-5309",
-          "name" : "ACME Corporation",
-          "homePage" : "https://www.acme-corp.com"
+          "is_syncing" : true,
+          "sync_status" : {
+            "current_block" : 6,
+            "starting_block" : 0,
+            "highest_block" : 1
+          }
         }
+      },
+      "inline_response_200_1" : {
+        "type" : "object",
+        "properties" : {
+          "fork" : {
+            "$ref" : "#/components/schemas/Fork"
+          },
+          "chain_id" : {
+            "type" : "integer",
+            "description" : "Sometimes called the network id, this number discerns the active chain for the BeaconNode. Analagous to Eth1.0 JSON-RPC net_version.",
+            "format" : "uint64"
+          }
+        },
+        "example" : {
+          "fork" : {
+            "previous_version" : "",
+            "current_version" : "",
+            "epoch" : 0
+          },
+          "chain_id" : 6
+        }
+      },
+      "Eth1Data" : {
+        "type" : "object",
+        "properties" : {
+          "deposit_root" : {
+            "pattern" : "^0x[a-fA-F0-9]{64}$",
+            "type" : "string",
+            "description" : "Root of the deposit tree.",
+            "format" : "byte"
+          },
+          "deposit_count" : {
+            "type" : "integer",
+            "description" : "Total number of deposits.",
+            "format" : "uint64"
+          },
+          "block_hash" : {
+            "pattern" : "^0x[a-fA-F0-9]{64}$",
+            "type" : "string",
+            "description" : "Ethereum 1.x block hash.",
+            "format" : "byte"
+          }
+        },
+        "description" : "The [`Eth1Data`](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/core/0_beacon-chain.md#eth1data) object from the Eth2.0 spec."
+      },
+      "ProposerSlashings" : {
+        "type" : "object",
+        "properties" : {
+          "proposer_index" : {
+            "type" : "integer",
+            "description" : "The index of the proposer to be slashed.",
+            "format" : "uint64"
+          },
+          "header_1" : {
+            "$ref" : "#/components/schemas/BeaconBlockHeader"
+          },
+          "header_2" : {
+            "$ref" : "#/components/schemas/BeaconBlockHeader"
+          }
+        },
+        "description" : "The [`ProposerSlashing`](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/core/0_beacon-chain.md#proposerslashing) object from the Eth2.0 spec."
+      },
+      "AttesterSlashings" : {
+        "type" : "object",
+        "properties" : {
+          "attestation_1" : {
+            "$ref" : "#/components/schemas/IndexedAttestation"
+          },
+          "attestation_2" : {
+            "$ref" : "#/components/schemas/IndexedAttestation"
+          }
+        },
+        "description" : "The [`AttesterSlashing`](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/core/0_beacon-chain.md#attesterslashing) object from the Eth2.0 spec."
+      },
+      "Attestation" : {
+        "type" : "object",
+        "properties" : {
+          "aggregation_bitfield" : {
+            "pattern" : "^0x[a-fA-F0-9]+$",
+            "type" : "string",
+            "description" : "Attester aggregation bitfield.",
+            "format" : "byte"
+          },
+          "custody_bitfield" : {
+            "pattern" : "^0x[a-fA-F0-9]+$",
+            "type" : "string",
+            "description" : "Custody bitfield.",
+            "format" : "byte"
+          },
+          "signature" : {
+            "pattern" : "^0x[a-fA-F0-9]{192}$",
+            "type" : "string",
+            "description" : "BLS aggregate signature.",
+            "format" : "byte"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/AttestationData"
+          }
+        },
+        "description" : "The [`Attestation`](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/core/0_beacon-chain.md#attestation) object from the Eth2.0 spec."
+      },
+      "DepositData" : {
+        "type" : "object",
+        "properties" : {
+          "pubkey" : {
+            "$ref" : "#/components/schemas/pubkey"
+          },
+          "withdrawal_credentials" : {
+            "pattern" : "^0x[a-fA-F0-9]{64}$",
+            "type" : "string",
+            "description" : "The withdrawal credentials.",
+            "format" : "byte"
+          },
+          "amount" : {
+            "type" : "integer",
+            "description" : "Amount in Gwei.",
+            "format" : "uint64"
+          },
+          "signature" : {
+            "pattern" : "^0x[a-fA-F0-9]{192}$",
+            "type" : "string",
+            "description" : "Container self-signature.",
+            "format" : "byte"
+          }
+        },
+        "description" : "The [`DepositData`](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/core/0_beacon-chain.md#depositdata) object from the Eth2.0 spec."
+      },
+      "Deposit" : {
+        "type" : "object",
+        "properties" : {
+          "proof" : {
+            "maxItems" : 2,
+            "minItems" : 2,
+            "type" : "array",
+            "description" : "Branch in the deposit tree.",
+            "items" : {
+              "oneOf" : [ {
+                "pattern" : "^0x[a-fA-F0-9]{64}$",
+                "type" : "string",
+                "format" : "byte"
+              }, {
+                "type" : "integer",
+                "description" : "The DEPOSIT_CONTRACT_TREE_DEPTH value.",
+                "format" : "uint64",
+                "example" : 32,
+                "enum" : [ 32 ]
+              } ]
+            }
+          },
+          "index" : {
+            "type" : "integer",
+            "description" : "Index in the deposit tree.",
+            "format" : "uint64"
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/DepositData"
+          }
+        },
+        "description" : "The [`Deposit`](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/core/0_beacon-chain.md#deposit) object from the Eth2.0 spec."
+      },
+      "VoluntaryExit" : {
+        "type" : "object",
+        "properties" : {
+          "epoch" : {
+            "type" : "integer",
+            "description" : "Minimum epoch for processing exit.",
+            "format" : "uint64"
+          },
+          "validator_index" : {
+            "type" : "integer",
+            "description" : "Index of the exiting validator.",
+            "format" : "uint64"
+          },
+          "signature" : {
+            "pattern" : "^0x[a-fA-F0-9]{192}$",
+            "type" : "string",
+            "description" : "Validator signature.",
+            "format" : "byte"
+          }
+        },
+        "description" : "The [`VoluntaryExit`](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/core/0_beacon-chain.md#voluntaryexit) object from the Eth2.0 spec."
+      },
+      "Transfer" : {
+        "type" : "object",
+        "properties" : {
+          "sender" : {
+            "type" : "integer",
+            "description" : "Sender index.",
+            "format" : "uint64"
+          },
+          "recipient" : {
+            "type" : "integer",
+            "description" : "Recipient index.",
+            "format" : "uint64"
+          },
+          "amount" : {
+            "type" : "integer",
+            "description" : "Amount in Gwei.",
+            "format" : "uint64"
+          },
+          "fee" : {
+            "type" : "integer",
+            "description" : "Fee in Gwei for block producer.",
+            "format" : "uint64"
+          },
+          "slot" : {
+            "type" : "integer",
+            "description" : "Inclusion slot.",
+            "format" : "uint64"
+          },
+          "pubkey" : {
+            "pattern" : "^0x[a-fA-F0-9]{96}$",
+            "type" : "string",
+            "description" : "Sender withdrawal public key.",
+            "format" : "byte"
+          },
+          "signature" : {
+            "pattern" : "^0x[a-fA-F0-9]{192}$",
+            "type" : "string",
+            "description" : "Sender signature.",
+            "format" : "byte"
+          }
+        },
+        "description" : "The [`Transfer`](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/core/0_beacon-chain.md#transfer) object from the Eth2.0 spec."
+      },
+      "CrossLink" : {
+        "type" : "object",
+        "properties" : {
+          "shard" : {
+            "type" : "integer",
+            "description" : "The shard number.",
+            "format" : "uint64"
+          },
+          "epoch" : {
+            "type" : "integer",
+            "description" : "The epoch number.",
+            "format" : "uint64"
+          },
+          "parent_root" : {
+            "pattern" : "^0x[a-fA-F0-9]{64}$",
+            "type" : "string",
+            "description" : "Root of the previous crosslink.",
+            "format" : "byte"
+          },
+          "data_root" : {
+            "pattern" : "^0x[a-fA-F0-9]{64}$",
+            "type" : "string",
+            "description" : "Root of the crosslinked shard data since the previous crosslink.",
+            "format" : "byte"
+          }
+        },
+        "description" : "The [`Crosslink`](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/core/0_beacon-chain.md#crosslink) object from the Eth2.0 spec.",
+        "example" : {
+          "data_root" : "",
+          "parent_root" : "",
+          "epoch" : 2,
+          "shard" : 5
+        }
+      }
+    },
+    "responses" : {
+      "Success" : {
+        "description" : "Request successful."
+      },
+      "InvalidRequest" : {
+        "description" : "Invalid request syntax."
+      },
+      "InternalError" : {
+        "description" : "Beacon node internal error."
+      },
+      "CurrentlySyncing" : {
+        "description" : "Beacon node is currently syncing, try again later."
       }
     }
   }
