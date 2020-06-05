@@ -84,7 +84,7 @@ namespace IO.Swagger
                     c.DescribeAllEnumsAsStrings();
                     c.IncludeXmlComments($"{AppContext.BaseDirectory}{Path.DirectorySeparatorChar}{_hostingEnv.ApplicationName}.xml");
                     // Sets the basePath property in the Swagger document generated
-                    c.DocumentFilter<BasePathFilter>("/insight-dc-sv-2020/geth/1.0.0");
+                    c.DocumentFilter<BasePathFilter>("/insight-dc-sv-2020/Spacemesh_Public_OpenAPI/1.0.0");
 
                     // Include DataAnnotation attributes on Controller Action parameters as Swagger validation rules (e.g required, pattern, ..)
                     // Use [ValidateModelState] on Actions to actually validate it in C# as well!

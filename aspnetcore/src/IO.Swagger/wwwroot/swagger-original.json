@@ -10,7 +10,10 @@
     "version" : "1.0.0"
   },
   "servers" : [ {
-    "url" : "https://virtserver.swaggerhub.com/insight-dc-sv-2020/geth/1.0.0",
+    "url" : "https://virtserver.swaggerhub.com/insight-dc-sv-2020/Spacemesh_Public_OpenAPI/1.0.0",
+    "description" : "SwaggerHub API Auto Mocking"
+  }, {
+    "url" : "https://virtserver.swaggerhub.com/insight-dc-sv-2020/spacemesh/1.0.0",
     "description" : "SwaggerHub API Auto Mocking"
   } ],
   "tags" : [ {
@@ -89,8 +92,8 @@
     },
     "/node/fork" : {
       "get" : {
-        "tags" : [ "Optional" ],
-        "summary" : "Get fork information from running beacon node.",
+        "tags" : [ "SyncStart" ],
+        "summary" : "Request that the node start syncing the mesh.",
         "description" : "Requests the beacon node to provide which fork version it is currently on.",
         "responses" : {
           "200" : {
@@ -111,8 +114,8 @@
     },
     "/validator/duties" : {
       "get" : {
-        "tags" : [ "Necessary for validator" ],
-        "summary" : "Get validator duties for the requested validators.",
+        "tags" : [ "SyncStart" ],
+        "summary" : "Request that the node start syncing the mesh.",
         "description" : "Requests the beacon node to provide a set of _duties_, which are actions that should be performed by validators. This API call should be polled at every slot, to ensure that any chain reorganisations are catered for, and to ensure that the currently connected beacon node is properly synchronised.",
         "parameters" : [ {
           "name" : "validator_pubkeys",
@@ -158,8 +161,8 @@
     },
     "/validator/block" : {
       "get" : {
-        "tags" : [ "Necessary for validator" ],
-        "summary" : "Produce a new block, without signature.",
+        "tags" : [ "Shutdown" ],
+        "summary" : "Request that the node initiate graceful shutdown",
         "description" : "Requests a beacon node to produce a valid block, which can then be signed by a validator.",
         "parameters" : [ {
           "name" : "slot",
@@ -207,8 +210,8 @@
         }
       },
       "post" : {
-        "tags" : [ "Necessary for validator" ],
-        "summary" : "Publish a signed block.",
+        "tags" : [ "StatusStream" ],
+        "summary" : "Node status events (sync and net).",
         "description" : "Instructs the beacon node to publish a newly signed beacon block to the beacon network, to be included in the beacon chain.",
         "parameters" : [ {
           "name" : "beacon_block",
@@ -239,8 +242,8 @@
     },
     "/validator/attestation" : {
       "get" : {
-        "tags" : [ "Necessary for validator" ],
-        "summary" : "Produce an attestation, without signature.",
+        "tags" : [ "ErrorStream" ],
+        "summary" : "Node error events.",
         "description" : "Requests that the beacon node produce an IndexedAttestation, with a blank signature field, which the validator will then sign.",
         "parameters" : [ {
           "name" : "slot",
@@ -286,8 +289,8 @@
         }
       },
       "post" : {
-        "tags" : [ "Necessary for validator" ],
-        "summary" : "Published a signed attestation.",
+        "tags" : [ "GenesisTime" ],
+        "summary" : "Network genesis time as unix epoch time.",
         "description" : "Instructs the beacon node to publish a newly signed IndexedAttestation object, to be incorporated into the beacon chain.",
         "parameters" : [ {
           "name" : "attestation",

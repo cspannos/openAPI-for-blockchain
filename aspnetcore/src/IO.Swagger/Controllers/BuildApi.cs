@@ -34,7 +34,7 @@ namespace IO.Swagger.Controllers
         /// <response code="200">Request successful</response>
         /// <response code="500">Beacon node internal error.</response>
         [HttpGet]
-        [Route("/insight-dc-sv-2020/geth/1.0.0/node/genesis_time")]
+        [Route("/insight-dc-sv-2020/Spacemesh_Public_OpenAPI/1.0.0/node/genesis_time")]
         [ValidateModelState]
         [SwaggerOperation("NodeGenesisTimeGet")]
         [SwaggerResponse(statusCode: 200, type: typeof(GenesisTime), description: "Request successful")]

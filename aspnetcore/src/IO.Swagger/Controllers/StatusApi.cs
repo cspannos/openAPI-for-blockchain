@@ -34,7 +34,7 @@ namespace IO.Swagger.Controllers
         /// <response code="200">Request successful</response>
         /// <response code="500">Beacon node internal error.</response>
         [HttpGet]
-        [Route("/insight-dc-sv-2020/geth/1.0.0/node/syncing")]
+        [Route("/insight-dc-sv-2020/Spacemesh_Public_OpenAPI/1.0.0/node/syncing")]
         [ValidateModelState]
         [SwaggerOperation("NodeSyncingGet")]
         [SwaggerResponse(statusCode: 200, type: typeof(InlineResponse200), description: "Request successful")]
