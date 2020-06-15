@@ -15,6 +15,9 @@
   }, {
     "url" : "https://virtserver.swaggerhub.com/insight-dc-sv-2020/spacemesh/1.0.0",
     "description" : "SwaggerHub API Auto Mocking"
+  }, {
+    "url" : "https://witti.infura.io/beacon/4eda36503f77407f92642f6db4ee5f14",
+    "description" : "Infura"
   } ],
   "tags" : [ {
     "name" : "NodeService",
