@@ -1,7 +1,7 @@
 {
   "openapi" : "3.0.1",
   "info" : {
-    "title" : "OpenAPI Implementation of Spacemesh API ",
+    "title" : "OpenAPI Implementation of Eth 2.0 ",
     "description" : "Minimal OpenAPI specification for Spacemesh public facing API.",
     "license" : {
       "name" : "MIT License",

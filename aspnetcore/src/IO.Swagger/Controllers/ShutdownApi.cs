@@ -1,5 +1,5 @@
 /*
- * OpenAPI Implementation of Spacemesh API 
+ * OpenAPI Implementation of Eth 2.0 
  *
  * Minimal OpenAPI specification for Spacemesh public facing API.
  *
